@@ -59,7 +59,7 @@ class Slack:
         for name, change in changes.items():
             message = ''
             new_version = self.shorten_docker_name(change['new']['version'])
-            old_version = self.shorten_docker_name(change['old']['version'])
+            old_version = self.shorten_docker_name(change['old']['version']) if change['old'] else False
             # image version changed
             if new_version != old_version:
                 message += f"Staging `{name}` is set to `{new_version}`"

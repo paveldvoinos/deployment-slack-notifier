@@ -59,18 +59,19 @@ class Collector:
             version = p['spec']['containers'][0]['image']
             readiness = ""
             ready = False
-            for condition in p['status']['conditions']:
-                if condition['status'] == 'True':
-                    readiness += condition['type'] + " "
-                    if condition['type'] == 'Ready':
-                        ready = True
+            if p['status'].get('conditions'):
+                for condition in p['status']['conditions']:
+                    if condition['status'] == 'True':
+                        readiness += condition['type'] + " "
+                        if condition['type'] == 'Ready':
+                            ready = True
             if not key in result:
                 result[key] = []
             result[ key ].append( {
                 "name": key,
                 "id": p['metadata']['name'],
                 "version": version,
-                "replicaset": p['metadata']['ownerReferences'][0]['name'],
+                "replicaset": p['metadata']['ownerReferences'][0]['name'] if p['metadata'].get('ownerReferences') else '',
                 "phase": p['status']['phase'],
                 "readiness": readiness,
                 "ready": ready
