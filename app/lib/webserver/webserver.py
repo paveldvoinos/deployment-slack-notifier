@@ -12,10 +12,13 @@ class MyHTTPRequestHandler(BaseHTTPRequestHandler):
             self.end_headers()
             self.wfile.write(json.dumps(self.collector.deployments()).encode())
         elif self.path == '/health':
-            self.send_response(200)
-            self.send_header('Content-type', 'text/plain')
-            self.end_headers()
-            self.wfile.write(b'OK')
+            if self.mainThread.is_alive():
+                self.send_response(200)
+                self.send_header('Content-type', 'text/plain')
+                self.end_headers()
+                self.wfile.write(b'OK')
+            else:
+                self.send_response(500)
         else:
             self.send_response(404)
             self.send_header('Content-type', 'text/html')
@@ -24,13 +27,13 @@ class MyHTTPRequestHandler(BaseHTTPRequestHandler):
 
 
 class Webserver:
-    def __init__(self, collector) -> None:
-        self.collector = collector
+    def __init__(self, mainThread) -> None:
+        self.mainThread = mainThread
         pass
 
     def start(self, port =80):
         httpd = HTTPServer(('0.0.0.0', port), MyHTTPRequestHandler)
-        httpd.RequestHandlerClass.collector = self.collector
+        httpd.RequestHandlerClass.mainThread = self.mainThread
         t = threading.Thread(target=httpd.serve_forever)
         t.start()
         # httpd.serve_forever()

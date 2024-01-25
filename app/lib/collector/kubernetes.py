@@ -3,7 +3,7 @@ from lib.kube.pods import Pods
 from lib.kube.replicasets import Replicasets
 import datetime
 
-class Collector:
+class KubernetesCollector:
 
     def __init__(self, client) -> None:
         self.__client = client
@@ -36,7 +36,7 @@ class Collector:
         for name, d in new.items():
             rec = {
                 "new": d,
-                "updatedAt": datetime.datetime.now().isoformat()
+                "detectedAt": datetime.datetime.now().isoformat()
             }
             if not name in old:
                 # added

@@ -73,8 +73,11 @@ class Slack:
                 "time": datetime.datetime.now() ,
                 "change": change,
                 "message": message,
+                "status": False,
+                "branch": False,
+                "author": False,
                 "id": post['ts'],
-                "channel": post['channel']
+                "channel": post['channel'],
             }
 
         return
@@ -98,7 +101,7 @@ class Slack:
             if (now - datetime.timedelta(minutes=30) > post['time']):
                 update = ""
                 self.update_message(post['channel'], post['id'], post['message'])
-                self.posts[_]['update'] = update
+                self.posts[_]['status'] = update
                 continue
             # get update
             key = post['change']['new']['name']
@@ -122,10 +125,23 @@ class Slack:
                     all_ready = False
             if all_ready and len(replicapods):
                 update = f":ready:"
-            text = post['message'] + f" {update}"
             # post update
-            if 'update' in post and post['update'] == update:
+            if post['status'] == update:
                 continue
-            self.update_message(channel=post['channel'], ts=post['id'], text=text)
-            self.posts[_]['update'] = update
+            self.posts[_]['status'] = update
+            text = self.buildText(self.posts[_])
+            self.update_message(channel=post['channel'], ts=post['id'], text=text)           
         return
+
+
+    def buildText(self, post):
+        message = f"{post['message']}"
+        if post['status']:
+            message += f" {post['status']}"
+        if post['branch'] or post['author']:
+            message += f"\n"
+        if post['author']:
+            message += f"by `{post['author']}` "
+        if post['branch']:
+            message += f"branch ${post['branch']}"
+        return message
