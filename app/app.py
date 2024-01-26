@@ -3,6 +3,7 @@ from lib.kube.client import KubeClient
 from lib.collector.kubernetes import KubernetesCollector
 from lib.slack.notify import Slack
 from lib.webserver.webserver import Webserver
+from lib.github.client import GithubClient
 import threading
 import time
 import os
@@ -13,6 +14,7 @@ CLUSTER_NAME = os.environ.get("CLUSTER_NAME")
 SLACK_TOKEN = os.environ.get("SLACK_TOKEN")
 SLACK_CHANNEL = os.environ.get("SLACK_CHANNEL")
 SLACK_ICON = os.environ.get("SLACK_ICON", ":kubernetes:")
+GITHUB_TOKEN = os.environ.get("GITHUB_TOKEN")
 
 
 k = KubeClient()
@@ -24,6 +26,7 @@ else:
 
 collector = KubernetesCollector(k)
 slack = Slack(token=SLACK_TOKEN, icon_emoji=SLACK_ICON)
+github = GithubClient(GITHUB_TOKEN)
 
 mainThread = threading.currentThread()
 Webserver(mainThread).start(PORT)
@@ -41,4 +44,5 @@ while(True):
     pods = collector.pods()
     replicasets = collector.replicasets()
     slack.pods(pods, replicasets)
+    slack.commits(github)
     time.sleep(PERIOD)

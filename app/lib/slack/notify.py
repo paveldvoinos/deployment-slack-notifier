@@ -1,5 +1,6 @@
 import requests
 import datetime
+import re
 
 class Slack:
     token = ''
@@ -145,3 +146,17 @@ class Slack:
         if post['branch']:
             message += f"branch ${post['branch']}"
         return message
+
+
+    def commits(self, github):
+        for _, post in self.posts.items():
+            # check only posts with unknonwn branches
+            if not post['branch']:
+                # find hash from version
+                version = post['change']['new']['version']
+                possible_commits = []
+                for match in re.finditer(r"([a-z0-9])*", version):
+                    if(match.isalnum() and not match.isalpha() and not match.isnumeric()):
+                        possible_commits.append(match)
+                for hash in possible_commits:
+                    print(post['change'])

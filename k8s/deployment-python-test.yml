@@ -1,0 +1,48 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: deployment-notifier-test
+  namespace: dev
+  labels:
+    type: main
+    app: deployment-notifier-test
+spec:
+  selector:
+    matchLabels:
+      type: main
+      app: deployment-notifier-test
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        type: main
+        app: deployment-notifier-test
+    spec:
+      containers:
+        - name: deployment-notifier
+          image: pdvoinos/deployment-slack-notifier:0.6
+          imagePullPolicy: Always
+          env:
+            - name: SLACK_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: deploy-notify
+                  key: slack-token
+            - name: SLACK_CHANNEL
+              value: "#павел-тест"
+            - name: SLACK_ICON
+              value: ":kubernetes:"
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8080
+            periodSeconds: 60
+          resources:
+            requests:
+              cpu: "250m"
+              memory: 512Mi
+              ephemeral-storage: 200Mi
+            limits:
+              cpu: "250m"
+              memory: 512Mi
+              ephemeral-storage: 200Mi

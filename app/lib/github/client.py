@@ -5,7 +5,7 @@ class GithubClient:
     __token = ""
     __org = ""
 
-    def __init__(self, token, organization) -> None:
+    def __init__(self, token, organization =False) -> None:
         self.__token = token
         self.__org = organization
         pass
