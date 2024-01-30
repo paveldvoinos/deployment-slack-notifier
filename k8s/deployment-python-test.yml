@@ -18,6 +18,7 @@ spec:
         type: main
         app: deployment-notifier-test
     spec:
+      terminationGracePeriodSeconds: 1
       containers:
         - name: deployment-notifier
           image: pdvoinos/deployment-slack-notifier:0.6
@@ -32,11 +33,17 @@ spec:
               value: "#павел-тест"
             - name: SLACK_ICON
               value: ":kubernetes:"
+            - name: GITHUB_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: deploy-notify
+                  key: github-token
           livenessProbe:
             httpGet:
               path: /health
               port: 8080
             periodSeconds: 60
+            failureThreshold: 1
           resources:
             requests:
               cpu: "250m"

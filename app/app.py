@@ -28,7 +28,7 @@ collector = KubernetesCollector(k)
 slack = Slack(token=SLACK_TOKEN, icon_emoji=SLACK_ICON)
 github = GithubClient(GITHUB_TOKEN)
 
-mainThread = threading.currentThread()
+mainThread = threading.current_thread()
 Webserver(mainThread).start(PORT)
 
 deployments = {}

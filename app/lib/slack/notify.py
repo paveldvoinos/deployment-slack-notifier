@@ -75,6 +75,7 @@ class Slack:
                 "change": change,
                 "message": message,
                 "status": False,
+                "repository": False,
                 "branch": False,
                 "author": False,
                 "id": post['ts'],
@@ -101,8 +102,9 @@ class Slack:
                 continue
             if (now - datetime.timedelta(minutes=30) > post['time']):
                 update = ""
-                self.update_message(post['channel'], post['id'], post['message'])
                 self.posts[_]['status'] = update
+                text = self.buildText(self.posts[_])
+                self.update_message(post['channel'], post['id'], text)
                 continue
             # get update
             key = post['change']['new']['name']
@@ -142,9 +144,9 @@ class Slack:
         if post['branch'] or post['author']:
             message += f"\n"
         if post['author']:
-            message += f"by `{post['author']}` "
+            message += f"By `{post['author']}` "
         if post['branch']:
-            message += f"branch ${post['branch']}"
+            message += f"Branch {post['branch']}"
         return message
 
 
@@ -156,7 +158,21 @@ class Slack:
                 version = post['change']['new']['version']
                 possible_commits = []
                 for match in re.finditer(r"([a-z0-9])*", version):
-                    if(match.isalnum() and not match.isalpha() and not match.isnumeric()):
-                        possible_commits.append(match)
+                    str = match.group()
+                    if(str.isalnum() and not str.isalpha() and not str.isnumeric()):
+                        possible_commits.append(str)
                 for hash in possible_commits:
-                    print(post['change'])
+                    print("hash search for", post['change']['new']['name'], post['change']['new']['version'], hash)
+                    repo = github.whereCommit(hash)
+                    branch = github.whereHead(repo, hash) if repo else False
+                    if repo:
+                        post['repository'] = repo
+                    if repo and branch:
+                        post['branch'] = f"<https://github.com/{repo}/commit/{hash}|{branch}>"
+                    if repo and not branch:
+                        post['branch'] = f"<https://github.com/{repo}/commit/{hash}|unknown>"
+                if post['repository']:
+                    self.posts[_] = post
+                    text = self.buildText(self.posts[_])
+                    self.update_message(channel=post['channel'], ts=post['id'], text=text)           
+                    break

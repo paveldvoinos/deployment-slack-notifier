@@ -22,16 +22,26 @@ class GithubClient:
         url = "https://api.github.com/user/repos?sort=pushed"
         r = self.get(url)
         recent = []
-        for repo in r.json().items():
+        for repo in r.json():
             recent.append( repo['full_name'] )
         return recent
 
-    def whereHead(self, commit_hash):
+    def whereCommit(self, commit_hash):
         result = False
         for repo in self.recentRepositories():
-            url = f"https://api.github.com/repos/{repo}/commits/{commit_hash}/branches-where-head"
-            r = self.get(url)
-            if len(r.json()):
-                branch = r.json()[0]['name']
-                result[ repo ] = branch
-                return result
+            url = f"https://api.github.com/repos/{repo}/commits/{commit_hash}"
+            headers = { 'Authorization': 'token '+self.__token }
+            r = requests.get(url, headers=headers)
+            if r.ok and len(r.json()):
+                result = repo
+                break
+        return result
+
+    def whereHead(self, repo, commit_hash):
+        result = False
+        url = f"https://api.github.com/repos/{repo}/commits/{commit_hash}/branches-where-head"
+        r = self.get(url)
+        if r.ok and len(r.json()):
+            branch = r.json()[0]['name']
+            result = branch
+        return result
