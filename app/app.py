@@ -14,7 +14,7 @@ CLUSTER_NAME = os.environ.get("CLUSTER_NAME")
 SLACK_TOKEN = os.environ.get("SLACK_TOKEN")
 SLACK_CHANNEL = os.environ.get("SLACK_CHANNEL")
 SLACK_ICON = os.environ.get("SLACK_ICON", ":kubernetes:")
-GITHUB_TOKEN = os.environ.get("GITHUB_TOKEN")
+GITHUB_TOKEN = os.environ.get("GITHUB_TOKEN", False)
 
 
 k = KubeClient()
@@ -44,5 +44,6 @@ while(True):
     pods = collector.pods()
     replicasets = collector.replicasets()
     slack.pods(pods, replicasets)
-    slack.commits(github)
+    if GITHUB_TOKEN:
+        slack.commits(github)
     time.sleep(PERIOD)

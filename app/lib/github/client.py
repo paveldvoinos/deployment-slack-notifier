@@ -29,7 +29,7 @@ class GithubClient:
     def whereCommit(self, commit_hash):
         result = False
         for repo in self.recentRepositories():
-            url = f"https://api.github.com/repos/{repo}/commits/{commit_hash}"
+            url = f"https://api.github.com/repos/{repo}/commits/{commit_hash}/status"
             headers = { 'Authorization': 'token '+self.__token }
             r = requests.get(url, headers=headers)
             if r.ok and len(r.json()):
