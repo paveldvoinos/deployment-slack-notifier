@@ -92,7 +92,28 @@ class Slack:
             name.pop(0)
             name = "/".join(name)
         return name
+    
 
+    # if author is email address, strip all after '@'
+    def shorten_author_name(self, name):
+        i = name.index('@')
+        return name[0:i] if i>0 else name
+
+
+    def build_repo_link(self, repo, branch):
+        link = False
+        # check if repo link is valid
+        if repo and repo.find('@') and repo.find(':') and repo.find('.git'):
+            repo = repo[ repo.find(':')+1 : repo.find('.git') ]
+        # text for slack
+        if repo and branch:
+            link = f"<https://github.com/{repo}/tree/{branch}|{branch}>"
+        if repo and not branch:
+            link = f""
+        if branch and not repo:
+            link = f"`{branch}`"
+        return link
+    
 
     def pods(self, pods, replicasets):
         for _, post in self.posts.items():
@@ -114,6 +135,11 @@ class Slack:
             for rs in replicasets[key]:
                 if rs['revision'] == revision:
                     replicaset = rs['name']
+                    if (rs.get('image-full') and rs['image-full'] == rs['version']):
+                        repo = rs['git-repo'] if rs['git-repo'] else False 
+                        branch = rs['git-branch'] if rs['git-branch'] else False
+                        self.posts[_]['branch'] = self.build_repo_link(repo, branch) if branch else False
+                        self.posts[_]['author'] = self.shorten_author_name(rs['gcloud-user']) if rs['gcloud-user'] else False
             for p in pods[key]:
                 if p['replicaset'] == replicaset:
                     replicapods.append(p)

@@ -21,7 +21,7 @@ spec:
       terminationGracePeriodSeconds: 1
       containers:
         - name: deployment-notifier
-          image: pdvoinos/deployment-slack-notifier:0.6
+          image: pdvoinos/deployment-slack-notifier:0.7
           imagePullPolicy: Always
           env:
             - name: SLACK_TOKEN
@@ -33,11 +33,11 @@ spec:
               value: "#павел-тест"
             - name: SLACK_ICON
               value: ":kubernetes:"
-            - name: GITHUB_TOKEN
-              valueFrom:
-                secretKeyRef:
-                  name: deploy-notify
-                  key: github-token
+            # - name: GITHUB_TOKEN
+            #   valueFrom:
+            #     secretKeyRef:
+            #       name: deploy-notify
+            #       key: github-token
           livenessProbe:
             httpGet:
               path: /health

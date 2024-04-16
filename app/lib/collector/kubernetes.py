@@ -88,10 +88,15 @@ class KubernetesCollector:
             revision = rs['metadata']['annotations']['deployment.kubernetes.io/revision']
             if not key in result:
                 result[key] = []
-            result[ key ].append( {
+            data = {
                 "name": rs['metadata']['name'],
                 "revision": revision,
                 "version": rs['spec']['template']['spec']['containers'][0]['image']
             }
-            )
+            for annotation in rs['metadata']['annotations']:
+                prefix = "fst-"
+                if str(annotation).startswith(prefix):
+                    data[annotation[len(prefix):]] = rs['metadata']['annotations'][annotation]
+            result[ key ].append( data )
+            
         return result
