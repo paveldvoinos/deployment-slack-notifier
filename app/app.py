@@ -14,6 +14,8 @@ CLUSTER_NAME = os.environ.get("CLUSTER_NAME")
 SLACK_TOKEN = os.environ.get("SLACK_TOKEN")
 SLACK_CHANNEL = os.environ.get("SLACK_CHANNEL")
 SLACK_ICON = os.environ.get("SLACK_ICON", ":kubernetes:")
+SLACK_USER_TITLE = os.environ.get("SLACK_USER_TITLE", False)
+NOTIFY_ENV_NAME = os.environ.get("NOTIFY_ENV_NAME", False)
 GITHUB_TOKEN = os.environ.get("GITHUB_TOKEN", False)
 
 
@@ -25,7 +27,7 @@ else:
 
 
 collector = KubernetesCollector(k)
-slack = Slack(token=SLACK_TOKEN, icon_emoji=SLACK_ICON)
+slack = Slack(token=SLACK_TOKEN, icon_emoji=SLACK_ICON, user_title=SLACK_USER_TITLE, env_name=NOTIFY_ENV_NAME)
 github = GithubClient(GITHUB_TOKEN)
 
 mainThread = threading.current_thread()

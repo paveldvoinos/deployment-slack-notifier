@@ -6,16 +6,18 @@ class Slack:
     token = ''
     icon_emoji = ''
     user_title = ''
+    env_name = ''
 
     posts = {}
 
-    def __init__(self, token, icon_emoji =False, user_title =False) -> None:
+    def __init__(self, token, icon_emoji =False, user_title =False, env_name =False) -> None:
         if not token:
             print("Slack token required!")
             exit(1)
         self.token = token
         self.icon_emoji = icon_emoji if icon_emoji else ':kubernetes:'
         self.user_title = user_title if user_title else 'Deployment notifier'
+        self.env_name = env_name if env_name else 'Staging'
         pass
 
 
@@ -63,10 +65,10 @@ class Slack:
             old_version = self.shorten_docker_name(change['old']['version']) if change['old'] else False
             # image version changed
             if new_version != old_version:
-                message += f"Staging `{name}` is set to `{new_version}`"
+                message += f"{self.env_name} `{name}` is set to `{new_version}`"
             # image stays same
             else:
-                message += f"Staging `{name}` is `{new_version}`\n"
+                message += f"{self.env_name} `{name}` is `{new_version}`\n"
                 message += f"Revision changed `{change['old']['revision']}` => `{change['new']['revision']}`"
             # send slack    
             post = self.send_message(channel, message)
